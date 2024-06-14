@@ -9,51 +9,68 @@ import { responseMiddleware } from "../middlewares/response.middleware.js";
 const router = Router();
 
 // TODO: Implement route controllers for user
-router.get('/', async (req, res, next) => {
-  try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(users);
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.get('/:id', async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.params.id);
-    res.status(200).json(user);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    res.data = user;
   } catch (error) {
-    next(error);
+    res.error = error;
+  } finally {
+    next();
   }
-});
+}, responseMiddleware);
+
+router.get('/', async (req, res, next) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.data = users;
+  } catch (error) {
+    res.error = error;
+  } finally {
+    next();
+  }
+}, responseMiddleware);
 
 router.post('/', createUserValid, async (req, res, next) => {
   try {
     const user = await userService.createUser(req.body);
-    res.status(201).json(user);
+    res.data = user;
   } catch (error) {
-    next(error);
+    res.error = error;
+  } finally {
+    next();
   }
-});
+}, responseMiddleware);
 
 router.patch('/:id', updateUserValid, async (req, res, next) => {
   try {
     const user = await userService.updateUser(req.params.id, req.body);
-    res.status(200).json(user);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    res.data = user;
   } catch (error) {
-    next(error);
+    res.error = error;
+  } finally {
+    next();
   }
-});
+}, responseMiddleware);
 
 router.delete('/:id', async (req, res, next) => {
   try {
     const user = await userService.deleteUser(req.params.id);
-    res.status(200).json(user);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    res.data = user;
   } catch (error) {
-    next(error);
+    res.error = error;
+  } finally {
+    next();
   }
-});
-
-router.use(responseMiddleware);
+}, responseMiddleware);
 
 export { router };
